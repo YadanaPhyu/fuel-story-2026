@@ -9,569 +9,498 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg:             #FAF9F6;
-    --bg-secondary:   #F2F0EB;
-    --text-primary:   #1A1814;
-    --text-secondary: #5A564F;
-    --text-tertiary:  #9A9590;
-    --border:         rgba(26,24,20,0.1);
-    --border-mid:     rgba(26,24,20,0.18);
-    --accent:         #C4622D;
-    --accent-light:   #F5E8DF;
-    --radius:         10px;
+    --bg: #FAF9F6; --bg-secondary: #F2F0EB;
+    --text-primary: #1A1814; --text-secondary: #5A564F; --text-tertiary: #9A9590;
+    --border: rgba(26,24,20,0.1); --border-mid: rgba(26,24,20,0.18);
+    --accent: #C4622D; --accent-light: #F5E8DF; --radius: 10px;
   }
-
   html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text-primary); font-family: 'Geist', sans-serif; font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
 
-  body {
-    background: var(--bg);
-    color: var(--text-primary);
-    font-family: 'Geist', sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
+  /* LANGUAGE TOGGLE */
+  .lang-bar { position: sticky; top: 0; z-index: 100; background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 10px 1.5rem; display: flex; justify-content: flex-end; }
+  .lang-toggle { display: flex; gap: 0; border: 0.5px solid var(--border-mid); border-radius: 99px; overflow: hidden; }
+  .lang-btn { padding: 5px 16px; font-size: 12px; font-family: 'Geist', sans-serif; background: transparent; border: none; cursor: pointer; color: var(--text-tertiary); transition: all 0.15s; }
+  .lang-btn.active { background: var(--accent); color: #fff; }
 
-  .story {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 4rem 1.5rem 6rem;
-  }
+  .story { max-width: 700px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
 
-  /* HEADER */
-  .topic-tag {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--text-tertiary); margin-bottom: 1.25rem;
-  }
-  .topic-tag::before {
-    content: ''; display: inline-block;
-    width: 20px; height: 1px; background: var(--accent);
-  }
+  /* hide/show language layers */
+  .mm { display: none; }
+  body.lang-mm .en { display: none; }
+  body.lang-mm .mm { display: block; }
+  body.lang-mm .mm-inline { display: inline; }
+  body.lang-mm .en-inline { display: none; }
+  .mm-inline { display: none; }
 
-  h1 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(1.9rem, 5vw, 3rem);
-    font-weight: 400; line-height: 1.15;
-    color: var(--text-primary); margin-bottom: 1.1rem;
-  }
+  .topic-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 1.25rem; }
+  .topic-tag::before { content: ''; display: inline-block; width: 20px; height: 1px; background: var(--accent); }
+  h1 { font-family: 'Instrument Serif', serif; font-size: clamp(1.9rem, 5vw, 3rem); font-weight: 400; line-height: 1.15; color: var(--text-primary); margin-bottom: 1.1rem; }
   h1 em { color: var(--accent); font-style: italic; }
+  .deck { font-size: 17px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }
+  .byline { font-size: 12px; color: var(--text-tertiary); display: flex; gap: 1rem; flex-wrap: wrap; padding-bottom: 2rem; border-bottom: 0.5px solid var(--border); }
 
-  .deck {
-    font-size: 17px; color: var(--text-secondary);
-    line-height: 1.8; margin-bottom: 1.5rem;
-  }
-
-  .byline {
-    font-size: 12px; color: var(--text-tertiary);
-    display: flex; gap: 1rem; flex-wrap: wrap;
-    padding-bottom: 2rem; border-bottom: 0.5px solid var(--border);
-  }
-
-  /* ALERT */
-  .alert {
-    display: flex; gap: 11px; align-items: flex-start;
-    background: #FFF0E8; border: 0.5px solid #E8A07A;
-    border-radius: var(--radius); padding: 13px 16px;
-    font-size: 13px; color: #7A3810; line-height: 1.65;
-    margin: 2rem 0;
-  }
-  .alert-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent); flex-shrink: 0; margin-top: 4px;
-  }
+  .alert { display: flex; gap: 11px; align-items: flex-start; background: #FFF0E8; border: 0.5px solid #E8A07A; border-radius: var(--radius); padding: 13px 16px; font-size: 13px; color: #7A3810; line-height: 1.65; margin: 2rem 0; }
+  .alert-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 4px; }
   .alert strong { font-weight: 500; }
 
-  /* PROSE */
-  .prose {
-    font-size: 16px; color: var(--text-secondary);
-    line-height: 1.85; margin-bottom: 1.5rem;
-  }
+  .prose { font-size: 16px; color: var(--text-secondary); line-height: 1.85; margin-bottom: 1.5rem; }
 
-  /* PART LABEL */
-  .part {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--text-tertiary);
-    margin: 3rem 0 1.25rem;
-    padding-bottom: 10px; border-bottom: 0.5px solid var(--border);
-  }
-  .part-num {
-    font-family: 'Instrument Serif', serif;
-    font-size: 13px; color: var(--accent);
-    font-style: italic; font-weight: 400;
-  }
+  .part { display: flex; align-items: center; gap: 10px; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin: 3rem 0 1.25rem; padding-bottom: 10px; border-bottom: 0.5px solid var(--border); }
+  .part-num { font-family: 'Instrument Serif', serif; font-size: 13px; color: var(--accent); font-style: italic; font-weight: 400; }
 
-  /* CHART */
   .chart-title { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 3px; }
-  .chart-sub   { font-size: 11px; color: var(--text-tertiary); margin-bottom: 1.1rem; }
-  .chart-wrap  { position: relative; width: 100%; margin-bottom: 2rem; }
+  .chart-sub { font-size: 11px; color: var(--text-tertiary); margin-bottom: 1.1rem; }
+  .chart-wrap { position: relative; width: 100%; margin-bottom: 2rem; }
 
-  /* LEGEND */
   .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 1rem; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
   .swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
-  /* INSIGHT */
-  .insight {
-    border-left: 3px solid var(--accent);
-    padding: 1rem 1.2rem;
-    background: var(--bg-secondary);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    margin: 0 0 3rem;
-  }
-  .insight-lbl {
-    font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 6px;
-  }
-  .insight-text {
-    font-family: 'Instrument Serif', serif;
-    font-size: 15px; font-style: italic;
-    color: var(--text-primary); line-height: 1.7;
-  }
+  .insight { border-left: 3px solid var(--accent); padding: 1rem 1.2rem; background: var(--bg-secondary); border-radius: 0 var(--radius) var(--radius) 0; margin: 0 0 3rem; }
+  .insight-lbl { font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .insight-text { font-family: 'Instrument Serif', serif; font-size: 15px; font-style: italic; color: var(--text-primary); line-height: 1.7; }
 
-  /* GEOPOLITICS TIMELINE */
-  .geo-timeline {
-    margin: 0 0 2.5rem;
-    display: flex; flex-direction: column; gap: 0;
-  }
-  .geo-event {
-    display: grid; grid-template-columns: 56px 1fr;
-    gap: 0; padding: 14px 0;
-    border-bottom: 0.5px solid var(--border);
-  }
+  .geo-timeline { margin: 0 0 2.5rem; display: flex; flex-direction: column; }
+  .geo-event { display: grid; grid-template-columns: 56px 1fr; padding: 14px 0; border-bottom: 0.5px solid var(--border); }
   .geo-event:first-child { border-top: 0.5px solid var(--border); }
-  .geo-year {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1rem; font-style: italic;
-    color: var(--accent); padding-top: 1px;
-  }
+  .geo-year { font-family: 'Instrument Serif', serif; font-size: 1rem; font-style: italic; color: var(--accent); padding-top: 1px; }
   .geo-body { padding-left: 1rem; border-left: 0.5px solid var(--border); }
   .geo-title { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
-  .geo-desc  { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+  .geo-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
 
-  /* REGION BARS */
   .region-bars { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
   .rbar { display: grid; grid-template-columns: 110px 1fr 44px; gap: 10px; align-items: center; }
   .rbar-label { font-size: 12px; color: var(--text-secondary); text-align: right; }
   .rbar-track { height: 6px; background: var(--bg-secondary); border-radius: 3px; overflow: hidden; }
-  .rbar-fill  { height: 6px; border-radius: 3px; }
-  .rbar-value { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+  .rbar-fill { height: 6px; border-radius: 3px; }
+  .rbar-value { font-size: 12px; font-weight: 500; }
 
-  /* STAT CARDS */
-  .stat-row {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 10px; margin-bottom: 2rem;
-  }
-  .stat-card {
-    background: #fff; border: 0.5px solid var(--border);
-    border-radius: var(--radius); padding: 14px;
-  }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 2rem; }
+  .stat-card { background: #fff; border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px; }
   .stat-num { font-size: 1.75rem; font-weight: 300; color: var(--text-primary); margin-bottom: 2px; }
   .stat-num span { font-size: 1rem; color: var(--accent); }
   .stat-label { font-size: 11px; color: var(--text-tertiary); line-height: 1.4; }
 
-  /* VULNERABILITY GRID */
   .risk-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 1.1rem; }
   .risk-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
   .risk-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-  .vuln-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 10px; margin-bottom: 2rem;
-  }
-  .vuln-card {
-    border: 0.5px solid var(--border); border-radius: var(--radius);
-    padding: 13px 14px; background: #fff; position: relative;
-  }
+  .vuln-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 2rem; }
+  .vuln-card { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 13px 14px; background: #fff; position: relative; }
   .vuln-card.highlight { border-color: var(--accent); border-width: 1.5px; }
-  .you-tag {
-    position: absolute; top: -9px; right: 10px;
-    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-    background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 99px;
-  }
   .vuln-country { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 3px; }
   .vuln-days { font-size: 25px; font-weight: 300; margin-bottom: 1px; }
-  .vuln-days-lbl {
-    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--text-tertiary); margin-bottom: 7px;
-  }
+  .vuln-days-lbl { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 7px; }
   .vuln-bar-bg { height: 3px; background: #EAE8E3; border-radius: 2px; overflow: hidden; margin-bottom: 7px; }
   .vuln-bar-fill { height: 3px; border-radius: 2px; }
   .vuln-dep { font-size: 11px; color: var(--text-secondary); line-height: 1.4; }
 
-  /* MYANMAR CALLOUT */
-  .myanmar-callout {
-    background: var(--accent-light); border: 1px solid #E8A07A;
-    border-radius: var(--radius); padding: 1.5rem; margin-bottom: 3rem;
-  }
-  .myanmar-callout .lbl {
-    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 8px;
-  }
-  .myanmar-callout h3 {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.1rem; font-weight: 400;
-    color: var(--text-primary); margin-bottom: 8px; line-height: 1.4;
-  }
+  .myanmar-callout { background: var(--accent-light); border: 1px solid #E8A07A; border-radius: var(--radius); padding: 1.5rem; margin-bottom: 3rem; }
+  .myanmar-callout .lbl { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .myanmar-callout h3 { font-family: 'Instrument Serif', serif; font-size: 1.1rem; font-weight: 400; color: var(--text-primary); margin-bottom: 8px; line-height: 1.4; }
   .myanmar-callout p { font-size: 13px; color: #6A3010; line-height: 1.75; }
 
-  /* BLOCKQUOTE */
-  blockquote {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.25rem; font-style: italic;
-    color: var(--text-primary); line-height: 1.55;
-    border-left: 3px solid var(--accent);
-    padding: 0.5rem 1.25rem; margin: 2rem 0;
-  }
+  blockquote { font-family: 'Instrument Serif', serif; font-size: 1.25rem; font-style: italic; color: var(--text-primary); line-height: 1.55; border-left: 3px solid var(--accent); padding: 0.5rem 1.25rem; margin: 2rem 0; }
 
-  /* SOURCES */
-  .sources {
-    border-top: 0.5px solid var(--border);
-    padding-top: 2.5rem; margin-top: 3rem;
-  }
-  .sources-title {
-    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
-    color: var(--text-tertiary);
-    padding-bottom: 10px; border-bottom: 0.5px solid var(--border);
-    margin-bottom: 1.1rem;
-  }
-  .source-item {
-    display: grid; grid-template-columns: 20px 1fr;
-    gap: 10px; padding: 10px 0;
-    border-bottom: 0.5px solid var(--border); align-items: start;
-  }
+  .disclaimer { background: var(--bg-secondary); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 2rem; font-size: 12px; color: var(--text-tertiary); line-height: 1.7; }
+  .disclaimer strong { color: var(--text-secondary); font-weight: 500; }
+
+  .sources { border-top: 0.5px solid var(--border); padding-top: 2.5rem; margin-top: 3rem; }
+  .sources-title { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); padding-bottom: 10px; border-bottom: 0.5px solid var(--border); margin-bottom: 1.1rem; }
+  .source-item { display: grid; grid-template-columns: 20px 1fr; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); align-items: start; }
   .source-num { font-size: 11px; color: var(--text-tertiary); padding-top: 2px; }
-  .source-link {
-    font-size: 13px; font-weight: 500; color: var(--accent);
-    text-decoration: none; display: block; margin-bottom: 2px; line-height: 1.4;
-  }
+  .source-link { font-size: 13px; font-weight: 500; color: var(--accent); text-decoration: none; display: block; margin-bottom: 2px; line-height: 1.4; }
   .source-link:hover { text-decoration: underline; }
   .source-meta { font-size: 11px; color: var(--text-tertiary); }
-  .source-tag {
-    display: inline-block; font-size: 9px; letter-spacing: 0.07em;
-    text-transform: uppercase; padding: 1px 7px; border-radius: 99px;
-    border: 0.5px solid var(--border-mid); color: var(--text-secondary); margin-left: 5px;
-  }
+  .source-tag { display: inline-block; font-size: 9px; letter-spacing: 0.07em; text-transform: uppercase; padding: 1px 7px; border-radius: 99px; border: 0.5px solid var(--border-mid); color: var(--text-secondary); margin-left: 5px; }
   .sources-note { font-size: 11px; color: var(--text-tertiary); line-height: 1.7; margin-top: 1.25rem; }
 
   @media (max-width: 540px) {
     .story { padding: 2.5rem 1.1rem 4rem; }
     .vuln-grid { grid-template-columns: repeat(2, 1fr); }
     .stat-row { grid-template-columns: 1fr 1fr; }
-    .rbar { grid-template-columns: 80px 1fr 36px; }
-    .rbar-label { font-size: 11px; }
+    .rbar { grid-template-columns: 90px 1fr 36px; }
   }
 </style>
 </head>
 <body>
+
+<!-- LANGUAGE TOGGLE -->
+<div class="lang-bar">
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('en')" id="btn-en">English</button>
+    <button class="lang-btn" onclick="setLang('mm')" id="btn-mm">မြန်မာ</button>
+  </div>
+</div>
+
 <div class="story">
 
-  <!-- HEADER -->
-  <p class="topic-tag">Energy &amp; Geopolitics</p>
-  <h1>Where does Middle East oil actually go — and <em>who breaks</em> if it stops?</h1>
-  <p class="deck">The Strait of Hormuz is a 33km waterway. About 20 million barrels of oil pass through it every single day. Right now, in March 2026, it is effectively shut. Here is what the numbers say about who suffers most — and why the answer is almost entirely Asia.</p>
+  <!-- ═══════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════ -->
+  <p class="topic-tag">
+    <span class="en">Energy &amp; Geopolitics</span>
+    <span class="mm">စွမ်းအင်နှင့် ပထဝီနိုင်ငံရေး</span>
+  </p>
+
+  <h1>
+    <span class="en">Where does Middle East oil actually go — and <em>who breaks</em> if it stops?</span>
+    <span class="mm">အရှေ့အလယ်ပိုင်းရေနံ အမှန်တကယ် ဘယ်ကို စီးဆင်းနေသလဲ — ထောက်ပံ့မှု ရပ်တန့်သွားရင် <em>ဘယ်သူတွေ အထိနာမလဲ?</em></span>
+  </h1>
+
+  <p class="deck en">The Strait of Hormuz is a 33km waterway. About 20 million barrels of oil pass through it every single day. Right now, in March 2026, it is effectively shut. Here is what the numbers say about who suffers most and why the answer is almost entirely Asia.</p>
+  <p class="deck mm">ဟော်မုဇ်ရေလက်ကြားသည် ၃၃ ကီလိုမီတာသာ ကျယ်ဝန်းသော်လည်း တစ်ရက်လျှင် ရေနံစည်ပေါင်း ၂၀ သန်း ဖြတ်သန်းရာ အရေးပါသော လမ်းကြောင်းဖြစ်သည်။ ၂၀၂၆ ခုနှစ် မတ်လတွင် ဤလမ်းကြောင်း ပိတ်ဆို့သွားပါက မည်သည့်နိုင်ငံများ အဆိုးရွားဆုံး ခံစားရမည်ကို ဒေတာများအရ လေ့လာကြည့်လျှင် အာရှတိုက်ဖြစ်ကြောင်း တွေ့ရသည်။</p>
+
   <div class="byline">
     <span>March 26, 2026</span>
     <span>·</span>
-    <span>10 min read</span>
+    <span class="en">10 min read</span><span class="mm">ဖတ်ရန် ၁၀ မိနစ်</span>
     <span>·</span>
-    <span>Sparked by a BBC news segment</span>
+    <span class="en">Sparked by a BBC news segment</span><span class="mm">BBC သတင်းအပိုင်းက စေ့ဆော်ခဲ့သည်</span>
   </div>
 
   <div class="alert">
     <span class="alert-dot"></span>
-    <div><strong>Live context:</strong> The US-Iran conflict that began late February 2026 has led to a blockade of the Strait of Hormuz. Brent crude has crossed $104 per barrel. Bangladesh has begun rationing fuel. Asian refineries are invoking force majeure. Myanmar has enforced odd-even driving rules. This story is happening now.</div>
+    <div>
+      <span class="en"><strong>Live context:</strong> The US-Iran conflict that began late February 2026 has led to a blockade of the Strait of Hormuz. Brent crude has crossed $104 per barrel. Bangladesh has begun rationing fuel. Asian refineries are invoking force majeure. Myanmar has enforced odd-even driving rules. This story is happening now.</span>
+      <span class="mm"><strong>လက်ရှိအခြေအနေ:</strong> ၂၀၂၆ ခုနှစ် ဖေဖော်ဝါရီလနှောင်းပိုင်းမှ စတင်ခဲ့သော အမေရိကန်-အီရန် ပဋိပက္ခကြောင့် ဟော်မုဇ်ရေလက်ကြား ပိတ်ဆို့နေသည်။ Brent ရေနံစိမ်းဈေးနှုန်းမှာ တစ်ဘာရယ်လျှင် ၁၀၄ ဒေါ်လာအထက်သို့ မြင့်တက်လာပြီး၊ ဘင်္ဂလားဒေ့ရှ်တွင် လောင်စာဆီ ခွဲတမ်းစနစ် စတင်နေပြီဖြစ်သည်။ အာရှရေနံချက်စက်ရုံများကလည်း မလွှဲမရှောင်သာသော အခြေအနေ (Force Majeure) ကြောင့် ထောက်ပံ့မှုများ ရပ်ဆိုင်းမည်ဟု ကြေညာထားသည်။ မြန်မာနိုင်ငံတွင်လည်း မော်တော်ယာဉ်များကို မ-စုံ-မ စနစ်ဖြင့် ကန့်သတ်မောင်းနှင်နေရသည်။</span>
+    </div>
   </div>
 
-  <!-- PART ZERO — THE GLOBAL PICTURE -->
-  <div class="part"><span class="part-num">Zero</span> The global picture first</div>
+  <!-- ═══════════════════════════════════════════
+       PART ZERO
+  ═══════════════════════════════════════════ -->
+  <div class="part">
+    <span class="part-num">Zero</span>
+    <span class="en">The global picture first</span>
+    <span class="mm">ကမ္ဘာလုံးဆိုင်ရာ အခြေအနေကို ဦးစွာကြည့်လျှင်</span>
+  </div>
 
-  <p class="prose">Before we get to who is most exposed, let's look at the full map. The Middle East produces about 32% of the world's oil. But production is only half the story — what matters geopolitically is who depends on that production to keep their economies running.</p>
+  <p class="prose en">Before we get to who is most exposed, let's look at the full map. The Middle East produces about 32% of the world's oil. But production is only half the story — what matters geopolitically is who depends on that production to keep their economies running.</p>
+  <p class="prose mm">မည်သူက အထိခိုက်လွယ်ဆုံး ဖြစ်သည်ကို မဆန်းစစ်မီ၊ ကမ္ဘာ့ရေနံစီးဆင်းမှု အခြေအနေကို ဦးစွာကြည့်ကြပါစို့။ အရှေ့အလယ်ပိုင်းသည် ကမ္ဘာ့ရေနံထုတ်လုပ်မှု၏ ၃၂ ရာခိုင်နှုန်းကို ထုတ်လုပ်ပေးနေသည်။ ပထဝီနိုင်ငံရေးအရ အရေးပါဆုံးသောအချက်မှာ ထိုရေနံအပေါ် မည်သူက ပိုမိုမှီခိုနေရသနည်း ဆိုသည်မှာပင် ဖြစ်သည်။</p>
 
-  <p class="chart-title">Where does Middle East crude oil actually flow? — by receiving region (2024)</p>
+  <p class="chart-title en">Where does Middle East crude oil actually flow? — by receiving region (2024)</p>
+  <p class="chart-title mm">ရေနံစီးဆင်းမှု - ပင်လယ်ကွေ့မှ ကမ္ဘာတစ်ဝန်းသို့ (၂၀၂၄)</p>
   <p class="chart-sub">Source: OPEC Annual Statistical Bulletin 2025 · EIA</p>
 
-  <div class="region-bars">
-    <div class="rbar">
-      <div class="rbar-label">Asia</div>
-      <div class="rbar-track"><div class="rbar-fill" style="width:72%;background:#C4622D;"></div></div>
-      <div class="rbar-value" style="color:#C4622D;">72%</div>
-    </div>
-    <div class="rbar">
-      <div class="rbar-label">Europe</div>
-      <div class="rbar-track"><div class="rbar-fill" style="width:18%;background:#E8956D;"></div></div>
-      <div class="rbar-value" style="color:#E8956D;">18%</div>
-    </div>
-    <div class="rbar">
-      <div class="rbar-label">Americas</div>
-      <div class="rbar-track"><div class="rbar-fill" style="width:6%;background:#B4B2A9;"></div></div>
-      <div class="rbar-value" style="color:#9A9590;">6%</div>
-    </div>
-    <div class="rbar">
-      <div class="rbar-label">Other</div>
-      <div class="rbar-track"><div class="rbar-fill" style="width:4%;background:#B4B2A9;"></div></div>
-      <div class="rbar-value" style="color:#9A9590;">4%</div>
-    </div>
-  </div>
+  <div class="region-bars" id="regionBars"></div>
 
   <div class="stat-row">
     <div class="stat-card">
       <div class="stat-num">32<span>%</span></div>
-      <div class="stat-label">of global oil production comes from the Middle East</div>
+      <div class="stat-label en">of global oil production comes from the Middle East</div>
+      <div class="stat-label mm">ကမ္ဘာ့ရေနံထုတ်လုပ်မှု၏ ရာခိုင်နှုန်းသည် အရှေ့အလယ်ပိုင်းမှ ဖြစ်သည်</div>
     </div>
     <div class="stat-card">
       <div class="stat-num">35<span>%</span></div>
-      <div class="stat-label">of all global oil exports originate from Gulf states</div>
+      <div class="stat-label en">of all global oil exports originate from Gulf states</div>
+      <div class="stat-label mm">ကမ္ဘာ့ရေနံတင်ပို့မှု စုစုပေါင်း၏ ရာခိုင်နှုန်းသည် ပင်လယ်ကွေ့နိုင်ငံများမှ ဖြစ်သည်</div>
     </div>
     <div class="stat-card">
       <div class="stat-num">55<span>%</span></div>
-      <div class="stat-label">of world's proven crude reserves held by six Gulf nations</div>
+      <div class="stat-label en">of world's proven crude reserves held by six Gulf nations</div>
+      <div class="stat-label mm">ကမ္ဘာ့ အတည်ပြုထားသော ရေနံသိုလှောင်ပမာဏ၏ ရာခိုင်နှုန်းကို ပင်လယ်ကွေ့နိုင်ငံ ခြောက်နိုင်ငံက ပိုင်ဆိုင်သည်</div>
     </div>
   </div>
 
-  <p class="prose">Europe gets about 12% of its crude from the Gulf — significant, but manageable because European nations hold mandatory 90-day emergency reserves and have diversified suppliers including Norway, the US, and until recently, Russia. The Americas barely register. That leaves Asia absorbing nearly three-quarters of everything the Middle East ships out.</p>
+  <p class="prose en">Europe gets about 12% of its crude from the Gulf — significant, but manageable. The Americas barely register. That leaves Asia absorbing nearly three-quarters of everything the Middle East ships out.</p>
+  <p class="prose mm">ဥရောပသည် ပင်လယ်ကွေ့မှ ရေနံ ၁၂ ရာခိုင်နှုန်းခန့်သာ တင်သွင်းသဖြင့် အရေးပါသော်လည်း အခက်အခဲကို ထိန်းညှိနိုင်သည့် အနေအထားတွင် ရှိသည်။ အမေရိကတိုက် နိုင်ငံများမှာမူ ပင်လယ်ကွေ့ရေနံအပေါ် မှီခိုမှု အလွန်နည်းပါးသည်။ သို့ဖြစ်ရာ အရှေ့အလယ်ပိုင်းမှ တင်ပို့သမျှ ရေနံ၏ သုံးပုံနှစ်ပုံခန့်မှာ အာရှသို့သာ စီးဆင်းနေသည်ဟု ဆိုရပါမည်။</p>
 
   <div class="insight">
-    <div class="insight-lbl">The asymmetry that defines this crisis</div>
-    <div class="insight-text">The Middle East sells 72% of its oil to Asia. But when the Strait shuts, the US feels almost nothing. Europe feels a price shock. Asia loses the fuel that runs its factories, farms, and commutes. Same crisis. Completely different exposure.</div>
+    <div class="insight-lbl en">The asymmetry that defines this crisis</div>
+    <div class="insight-lbl mm">အကျပ်အတည်း၏ သက်ရောက်မှု ကွာခြားချက်</div>
+    <div class="insight-text en">The Middle East sells 72% of its oil to Asia. But when the Strait shuts, the US feels almost nothing. Europe feels a price shock. Asia loses the fuel that runs its factories, farms, and commutes. Same crisis. Completely different exposure.</div>
+    <div class="insight-text mm">အရှေ့အလယ်ပိုင်းသည် ၎င်း၏ ရေနံ ၇၂% ကို အာရှသို့ တင်ပို့သည်။ သို့သော် ရေလက်ကြားပိတ်သွားပါက အမေရိကန်မှာ ထိခိုက်မှုနည်းသော်လည်း အာရှမှာမူ စက်ရုံ၊ အလုပ်ရုံနှင့် သယ်ယူပို့ဆောင်ရေးအတွက် အဓိကကျသော လောင်စာဆီများ ဆုံးရှုံးရမည်ဖြစ်သည်။ အကျပ်အတည်းမှာ တစ်ခုတည်းဖြစ်သော်လည်း ထိခိုက်မှုမှာ လုံးဝကွဲပြားခြားနားသည်။</div>
   </div>
 
-  <!-- PART ONE — GEOPOLITICS -->
-  <div class="part"><span class="part-num">One</span> Why Asia? The geopolitics behind the numbers</div>
-
-  <p class="prose">This lopsided dependency didn't happen by accident. It is the product of decades of deliberate policy choices, one energy revolution, and the simple geography of where Asia's oil fields ran dry.</p>
-
-  <div class="geo-timeline">
-    <div class="geo-event">
-      <div class="geo-year">1973</div>
-      <div class="geo-body">
-        <div class="geo-title">The oil shock that changed everything for Asia</div>
-        <div class="geo-desc">OPEC's oil embargo hits Western nations hardest, but Japan — importing 99% of its oil — nearly collapses economically. It forces Japan, South Korea, and Taiwan to build strategic reserves and lock in long-term Gulf supply deals. The dependency is institutionalized.</div>
-      </div>
-    </div>
-    <div class="geo-event">
-      <div class="geo-year">1980s</div>
-      <div class="geo-body">
-        <div class="geo-title">The US becomes the Gulf's security guarantor</div>
-        <div class="geo-desc">America stations naval forces in the Gulf, signs security agreements with Saudi Arabia, and essentially guarantees the free flow of oil — in exchange for Gulf states pricing oil in US dollars. Asia benefits from this security umbrella without paying for it.</div>
-      </div>
-    </div>
-    <div class="geo-event">
-      <div class="geo-year">1993</div>
-      <div class="geo-body">
-        <div class="geo-title">China crosses the line — from exporter to importer</div>
-        <div class="geo-desc">China's domestic oil consumption exceeds production for the first time. It begins sourcing from the Middle East aggressively, locking in supply deals with Saudi Arabia, Iran, and Iraq. By the 2010s, China becomes the world's largest crude importer.</div>
-      </div>
-    </div>
-    <div class="geo-event">
-      <div class="geo-year">2008–2015</div>
-      <div class="geo-body">
-        <div class="geo-title">The US shale revolution — and its quiet geopolitical consequence</div>
-        <div class="geo-desc">Hydraulic fracking unlocks vast domestic oil reserves. US production doubles. By 2020, the US becomes a net oil exporter for the first time since 1949. Washington begins stepping back from Middle East security commitments. The risk doesn't disappear — it transfers to Asia.</div>
-      </div>
-    </div>
-    <div class="geo-event">
-      <div class="geo-year">2020s</div>
-      <div class="geo-body">
-        <div class="geo-title">Asia industrialises faster than it can diversify</div>
-        <div class="geo-desc">China, India, Vietnam, Bangladesh, and the Philippines drive the world's fastest economic growth — all powered by oil they import from one region. Renewables are growing but cannot displace baseload demand fast enough. The dependency deepens every year.</div>
-      </div>
-    </div>
-    <div class="geo-event">
-      <div class="geo-year">2026</div>
-      <div class="geo-body">
-        <div class="geo-title">The bill comes due</div>
-        <div class="geo-desc">The US-Iran war shuts the Strait of Hormuz. The US, which receives just 2.5% of Hormuz oil, feels a price bump. Asia, which receives 89%, faces an existential supply crisis. Decades of dependency, compressed into weeks.</div>
-      </div>
-    </div>
+  <!-- ═══════════════════════════════════════════
+       PART ONE — GEOPOLITICS
+  ═══════════════════════════════════════════ -->
+  <div class="part">
+    <span class="part-num">One</span>
+    <span class="en">Why Asia? The geopolitics behind the numbers</span>
+    <span class="mm">အဘယ်ကြောင့် အာရှဖြစ်သနည်း။ ကိန်းဂဏန်းများနောက်ကွယ်မှ ပထဝီနိုင်ငံရေး အခင်းအကျင်း</span>
   </div>
+
+  <p class="prose en">This lopsided dependency didn't happen by accident. It is the product of decades of deliberate policy choices, one energy revolution, and the simple geography of where Asia's oil fields ran dry.</p>
+  <p class="prose mm">ဤကဲ့သို့ မမျှတသော မှီခိုမှုသည် တိုက်ဆိုင်မှုတစ်ခု မဟုတ်ပါ။ ဆယ်စုနှစ်များစွာကြာ ကျင့်သုံးခဲ့သည့် မဟာဗျူဟာမြောက် မူဝါဒများ၊ စွမ်းအင်ကဏ္ဍ အပြောင်းအလဲများနှင့် အာရှ၏ ရေနံအရင်းအမြစ်များ ခန်းခြောက်လာသည့် ပထဝီဝင် အခြေအနေများကြောင့် ပေါ်ပေါက်လာရသည့် အကျိုးဆက်ပင် ဖြစ်သည်။</p>
+
+  <div class="geo-timeline" id="geoTimeline"></div>
 
   <div class="insight">
-    <div class="insight-lbl">The shale revolution's hidden consequence</div>
-    <div class="insight-text">When the US stopped needing Middle East oil, it also stopped feeling urgency to protect the region. The security umbrella quietly shrank. Asia kept importing. The risk didn't disappear — it just stopped being America's problem.</div>
+    <div class="insight-lbl en">The shale revolution's hidden consequence</div>
+    <div class="insight-lbl mm">Shale တော်လှန်ရေး၏ နောက်ကွယ်မှ အကျိုးဆက်</div>
+    <div class="insight-text en">When the US stopped needing Middle East oil, it also stopped feeling urgency to protect the region. The security umbrella quietly shrank. Asia kept importing. The risk didn't disappear — it just stopped being America's problem.</div>
+    <div class="insight-text mm">အမေရိကန်သည် အရှေ့အလယ်ပိုင်းရေနံအပေါ် မှီခိုရန် မလိုတော့သည့်အခါ ထိုဒေသ၏ လုံခြုံရေးကို အကာအကွယ်ပေးရန် အရေးတကြီး လိုအပ်ချက်မှာလည်း လျော့နည်းသွားခဲ့သည်။ ရလဒ်အနေဖြင့် လုံခြုံရေးဆိုင်ရာ အကာအကွယ်ပေးမှုမှာ တဖြည်းဖြည်း လျော့ပါးသွားသော်လည်း အာရှနိုင်ငံများကမူ ဆက်လက်တင်သွင်းနေဆဲဖြစ်သည်။ ဆိုလိုသည်မှာ ဘေးအန္တရာယ်မှာ ပျောက်ကွယ်သွားခြင်းမဟုတ်ဘဲ အမေရိကန်၏ ပြဿနာမှ အာရှ၏ ပြဿနာအဖြစ်သို့သာ အသွင်ပြောင်းသွားခြင်း ဖြစ်သည်။</div>
   </div>
 
-  <!-- PART TWO -->
-  <div class="part"><span class="part-num">Two</span> Where does the oil go? The Hormuz breakdown</div>
+  <!-- ═══════════════════════════════════════════
+       PART TWO
+  ═══════════════════════════════════════════ -->
+  <div class="part">
+    <span class="part-num">Two</span>
+    <span class="en">Where does the oil go? The Hormuz breakdown</span>
+    <span class="mm">ရေနံစီးဆင်းမှု လမ်းကြောင်းများ - ဟော်မုဇ်ရေလက်ကြား၏ အခန်းကဏ္ဍကို ခွဲခြမ်းစိတ်ဖြာခြင်း</span>
+  </div>
 
-  <p class="prose">The Strait of Hormuz is where the geopolitics becomes a number. About 20 million barrels pass through its 33km width every single day — roughly 25% of all global seaborne oil trade. Here is exactly who receives it.</p>
+  <p class="prose en">About 20 million barrels pass through its 33km width every single day — roughly 25% of all global seaborne oil trade. Here is exactly who receives it.</p>
+  <p class="prose mm">အကျယ် ၃၃ ကီလိုမီတာသာရှိသော ဟော်မုဇ်ရေလက်ကြားမှတစ်ဆင့် တစ်ရက်လျှင် ရေနံစည်ပေါင်း ၂၀ သန်းခန့် ဖြတ်သန်းနေသည်။ ယင်းပမာဏမှာ ကမ္ဘာလုံးဆိုင်ရာ ပင်လယ်ရေကြောင်း ရေနံကုန်သွယ်မှု စုစုပေါင်း၏ ၂၅ ရာခိုင်နှုန်းခန့် ဖြစ်သည်။ မည်သည့်ဒေသများသို့ မည်မျှပမာဏအထိ စီးဆင်းနေသည်ကို အောက်ပါ ဇယားတွင် အသေးစိတ် လေ့လာနိုင်သည်။</p>
 
-  <p class="chart-title">Strait of Hormuz oil flows by destination country — Q1 2025 (% of total)</p>
+  <p class="chart-title en">Strait of Hormuz oil flows by destination country — Q1 2025 (% of total)</p>
+  <p class="chart-title mm">ဟော်မုဇ်ရေလက်ကြား ရေနံစီးဆင်းမှု - ဆိုက်ရောက်နိုင်ငံအလိုက် - ၂၀၂၅ ခုနှစ်၊ ပထမသုံးလပတ် (စုစုပေါင်း၏ ရာခိုင်နှုန်း)</p>
   <p class="chart-sub">Source: U.S. Energy Information Administration (EIA)</p>
-  <div class="legend">
-    <span class="legend-item"><span class="swatch" style="background:#C4622D;"></span>China 37.7%</span>
-    <span class="legend-item"><span class="swatch" style="background:#E8956D;"></span>India 14.7%</span>
-    <span class="legend-item"><span class="swatch" style="background:#1D9E75;"></span>Japan 10.9%</span>
-    <span class="legend-item"><span class="swatch" style="background:#5DCAA5;"></span>South Korea 12.0%</span>
-    <span class="legend-item"><span class="swatch" style="background:#7F77DD;"></span>Other Asia 13.9%</span>
-    <span class="legend-item"><span class="swatch" style="background:#B4B2A9;"></span>Rest of world 10.8%</span>
-  </div>
+
+  <div class="legend" id="flowLegend"></div>
   <div class="chart-wrap" style="height:290px;"><canvas id="flowChart"></canvas></div>
 
   <div class="insight">
-    <div class="insight-lbl">The number that matters</div>
-    <div class="insight-text">89% of all Hormuz oil goes to Asia. China alone takes 38%. The US takes 2.5%. This is not a shared global crisis. It is an Asian crisis that the rest of the world watches through a price ticker.</div>
+    <div class="insight-lbl en">The number that matters</div>
+    <div class="insight-lbl mm">အဓိကကျသော ကိန်းဂဏန်း</div>
+    <div class="insight-text en">89% of all Hormuz oil goes to Asia. China alone takes 38%. The US takes 2.5%. This is not a shared global crisis. It is an Asian crisis that the rest of the world watches through a price ticker.</div>
+    <div class="insight-text mm">ဟော်မုဇ်ရေလက်ကြားမှ စီးဆင်းသော ရေနံစုစုပေါင်း၏ ၈၉ ရာခိုင်နှုန်းသည် အာရှတိုက်သို့ ဦးတည်နေသည်။ တရုတ်နိုင်ငံ တစ်နိုင်ငံတည်းကပင် ၃၈ ရာခိုင်နှုန်းအထိ တင်သွင်းနေပြီး အမေရိကန်၏ တင်သွင်းမှုမှာမူ ၂.၅ ရာခိုင်နှုန်းသာ ရှိသည်။ ထို့ကြောင့် ဤအခြေအနေသည် တစ်ကမ္ဘာလုံးက အတူတကွ ရင်ဆိုင်ရမည့် အကျပ်အတည်း မဟုတ်ဘဲ အာရှတိုက်၏ ရှင်သန်ရပ်တည်ရေးဆိုင်ရာ အကျပ်အတည်းသာ ဖြစ်သည်။ ကျန်ကမ္ဘာ့နိုင်ငံများမှာမူ ရေနံဈေးနှုန်း အတက်အကျ ပြကွက်တစ်ခုအဖြစ်သာ ဘေးမှ စောင့်ကြည့်နေကြမည်ဖြစ်သည်။</div>
   </div>
 
-  <!-- PART THREE -->
-  <div class="part"><span class="part-num">Three</span> Who exports through it?</div>
+  <!-- ═══════════════════════════════════════════
+       PART THREE
+  ═══════════════════════════════════════════ -->
+  <div class="part">
+    <span class="part-num">Three</span>
+    <span class="en">Who exports through it?</span>
+    <span class="mm">မည်သည့်နိုင်ငံများက ဤလမ်းကြောင်းမှ တင်ပို့နေသလဲ?</span>
+  </div>
 
-  <p class="prose">Six Gulf states — Saudi Arabia, Iraq, UAE, Kuwait, Iran, and Qatar — depend on this single passage to reach the world market. Before the blockade, Saudi Arabia was routing nearly 90% of its oil exports through the strait. There is almost no meaningful bypass.</p>
+  <p class="prose en">Six Gulf states depend on this single passage to reach the world market. Before the blockade, Saudi Arabia was routing nearly 90% of its oil exports through the strait. There is almost no meaningful bypass.</p>
+  <p class="prose mm">ပင်လယ်ကွေ့နိုင်ငံ ခြောက်နိုင်ငံသည် ကမ္ဘာ့ဈေးကွက်သို့ ရောက်ရှိရန် ဤလမ်းကြောင်းတစ်ခုတည်းကိုသာ အဓိကအားထားနေရသည်။ ပိတ်ဆို့မှုမဖြစ်ပွားမီက ဆော်ဒီအာရေဗျသည် ၎င်း၏ ရေနံတင်ပို့မှု စုစုပေါင်း၏ ၉၀ ရာခိုင်နှုန်းနီးပါးကို ဤရေလက်ကြားမှတစ်ဆင့် ပို့ဆောင်ခဲ့သည်။ ဤလမ်းကြောင်းကို ကျော်လွှဲနိုင်သည့် အခြားထိရောက်သော လမ်းကြောင်းဟူ၍ လုံးဝမရှိသလောက်ပင် ဖြစ်သည်။</p>
 
-  <p class="chart-title">Middle East crude exports through Strait of Hormuz by country (% of total)</p>
+  <p class="chart-title en">Middle East crude exports through Strait of Hormuz by country (% of total)</p>
+  <p class="chart-title mm">နိုင်ငံအလိုက် ဟော်မုဇ်ရေလက်ကြားမှတစ်ဆင့် အရှေ့အလယ်ပိုင်း ရေနံစိမ်း တင်ပို့မှု (စုစုပေါင်း၏ ရာခိုင်နှုန်း)</p>
   <p class="chart-sub">Source: U.S. EIA · Visual Capitalist</p>
   <div class="chart-wrap" style="height:250px;"><canvas id="exportChart"></canvas></div>
 
   <div class="insight">
-    <div class="insight-lbl">Why there is no plan B</div>
-    <div class="insight-text">Saudi Arabia and the UAE have combined pipeline bypass capacity of about 2.6 million barrels per day — a fraction of their own daily production. Most Gulf states have no alternative route at all. The Strait of Hormuz is not a bottleneck. It is the only road.</div>
+    <div class="insight-lbl en">Why there is no plan B</div>
+    <div class="insight-lbl mm">အစားထိုးအစီအစဉ် မရှိရသောအကြောင်း</div>
+    <div class="insight-text en">Saudi Arabia and the UAE have combined pipeline bypass capacity of about 2.6 million barrels per day — a fraction of their own production. Most Gulf states have no alternative route at all. The Strait of Hormuz is not a bottleneck. It is the only road.</div>
+    <div class="insight-text mm">ဆော်ဒီအာရေဗျနှင့် ယူအေအီး (UAE) တို့တွင် တစ်ရက်လျှင် ရေနံစည် ၂.၆ သန်းခန့် ပို့ဆောင်နိုင်သည့် ကျော်လွှဲပိုက်လိုင်းများ ရှိသော်လည်း၊ ယင်းမှာ ၎င်းတို့၏ စုစုပေါင်းထုတ်လုပ်မှု ပမာဏနှင့် နှိုင်းယှဉ်ပါက အလွန်နည်းပါးသော အစိတ်အပိုင်းမျှသာ ဖြစ်သည်။ ပင်လယ်ကွေ့နိုင်ငံ အများစုတွင်မူ အခြားရွေးချယ်စရာ လမ်းကြောင်း လုံးဝမရှိပေ။ သို့ဖြစ်ရာ ဟော်မုဇ်ရေလက်ကြားသည် သာမန် ပိတ်ဆို့မှုဖြစ်နိုင်သည့် နေရာတစ်ခု (Bottleneck) မျှသာ မဟုတ်ဘဲ အစားထိုးမရနိုင်သော တစ်ခုတည်းသော ကုန်သွယ်ရေးလမ်းမကြီး ဖြစ်သည်။</div>
   </div>
 
-  <!-- PART FOUR -->
-  <div class="part"><span class="part-num">Four</span> Who breaks first?</div>
+  <!-- ═══════════════════════════════════════════
+       PART FOUR
+  ═══════════════════════════════════════════ -->
+  <div class="part">
+    <span class="part-num">Four</span>
+    <span class="en">Who breaks first?</span>
+    <span class="mm">အထိခိုက်လွယ်ဆုံးနိုင်ငံများ</span>
+  </div>
 
-  <p class="prose">Strategic petroleum reserves tell you how long a country can survive without new imports. The lower the number, the faster the crisis moves from global headline to local petrol station. The globally recommended minimum is 90 days.</p>
+  <p class="prose en">Strategic petroleum reserves tell you how long a country can survive without new imports. The lower the number, the faster the crisis arrives at ordinary people's lives. The globally recommended minimum is 90 days.</p>
+  <p class="prose mm">မဟာဗျူဟာမြောက် ရေနံသိုလှောင်မှု (Strategic Petroleum Reserves) ပမာဏသည် နိုင်ငံတစ်နိုင်ငံအနေဖြင့် သွင်းကုန်အသစ်မရှိဘဲ မည်မျှကြာကြာ ရပ်တည်နိုင်မည်ကို ဖော်ပြနေသည်။ ဤကိန်းဂဏန်း နိမ့်ပါးလေလေ၊ အကျပ်အတည်း၏ သက်ရောက်မှုသည် သာမန်ပြည်သူများ၏ လူမှုစီးပွားဘဝဆီသို့ ပိုမိုမြန်ဆန်စွာ ရောက်ရှိလာလေလေဖြစ်သည်။ နိုင်ငံတကာ စွမ်းအင်အေဂျင်စီ၏ အကြံပြုထားသော အနည်းဆုံး သိုလှောင်မှုပမာဏမှာ ရက်ပေါင်း ၉၀ စာ ဖြစ်သည်။</p>
 
   <div class="risk-legend">
-    <span class="risk-item"><span class="risk-dot" style="background:#A32D2D;"></span>Critical — under 30 days</span>
-    <span class="risk-item"><span class="risk-dot" style="background:#C4622D;"></span>Vulnerable — 30–60 days</span>
-    <span class="risk-item"><span class="risk-dot" style="background:#E8956D;"></span>Exposed — 60–100 days</span>
-    <span class="risk-item"><span class="risk-dot" style="background:#1D9E75;"></span>Buffered — 100+ days</span>
-  </div>
+    <span class="risk-item"><span class="risk-dot" style="background:#A32D2D;"></span><span class="en">Critical — under 30 days</span><span class="mm">အလွန်စိုးရိမ်ရ (Critical): ရက် ၃၀ အောက်</span></span>
+    <span class="risk-item"><span class="risk-dot" style="background:#C4622D;"></span><span class="en">Vulnerable — 30–60 days</span><span class="mm">ထိခိုက်လွယ် (Vulnerable): ရက် ၃၀ မှ ၆၀</span></span>
+    <span class="risk-item"><span class="risk-dot" style="background:#E8956D;"></span><span class="en">Exposed — 60–100 days</span><span class="mm">စိုးရိမ်ရ (Exposed): ရက် ၆၀ မှ ၁၀၀</span></span>
+    <span class="risk-item"><span class="risk-dot" style="background:#1D9E75;"></span><span class="en">Buffered — 100+ days</span><span class="mm">ခံနိုင်ရည်ရှိ (Buffered): ရက် ၁၀၀ နှင့်အထက်</span></span>
+  </div>1
   <div class="vuln-grid" id="vulnGrid"></div>
 
   <div class="myanmar-callout">
-    <div class="lbl">Myanmar — a closer look</div>
-    <h3>40 days. 3% domestic production. One-third of all imports is fuel.</h3>
-    <p>Myanmar's domestic oil production covers only 3–5% of total fuel demand. Everything else is imported. With just 40 days of strategic reserves — well below the recommended 90 — the country has almost no buffer against a prolonged supply shock. Fuel accounts for roughly one-third of all Myanmar's imports, meaning a price spike doesn't just hit the pump. It strains foreign exchange reserves, pushes inflation across food and transport, and tightens the government's ability to import anything else. The military government has already enforced an odd-even driving rule in response to the current crisis. On March 5, the Central Bank released $32 million to oil traders just to stabilize supply. These are emergency measures — and emergency measures have a time limit.</p>
+    <div class="lbl en">Myanmar — a closer look</div>
+    <div class="lbl mm">မြန်မာနိုင်ငံအတွက် အနီးကပ်လေ့လာချက် (Myanmar Callout)</div>
+    <h3 class="en">40 days. 3% domestic production. One-third of all imports is fuel.</h3>
+    <h3 class="mm">၄၀ ရက်စာ သိုလှောင်မှု။ ပြည်တွင်းထုတ်လုပ်မှု ၃% သာရှိ။ သွင်းကုန်စုစုပေါင်း၏ သုံးပုံတစ်ပုံမှာ လောင်စာဆီ ဖြစ်သည်။</h3>
+    <p class="en">Myanmar's domestic oil production covers only 3–5% of total fuel demand. Everything else is imported. With just 40 days of strategic reserves — well below the recommended 90 — the country has almost no buffer. Fuel accounts for roughly one-third of all Myanmar's imports, meaning a price spike doesn't just hit the pump. It strains foreign exchange reserves, pushes inflation across food and transport, and tightens the government's ability to import anything else. The military government has already enforced an odd-even driving rule. On March 5, the Central Bank released $32 million to oil traders just to stabilize supply. These are emergency measures — and emergency measures have a time limit.</p>
+    <p class="mm">မြန်မာနိုင်ငံ၏ လောင်စာဆီလိုအပ်ချက်၏ ၃% မှ ၅% ခန့်ကိုသာ ပြည်တွင်း၌ ထုတ်လုပ်နိုင်ပြီး ကျန်ရှိသော ပမာဏအားလုံးကို ပြည်ပမှသာ တင်သွင်းနေရသည်။ မဟာဗျူဟာမြောက် သိုလှောင်ထားရှိမှုမှာလည်း ရက်ပေါင်း ၄၀ စာခန့်သာရှိသဖြင့် နိုင်ငံတကာ အကြံပြုချက်ဖြစ်သော ရက် ၉၀ နှင့် နှိုင်းယှဉ်ပါက များစွာလျော့နည်းနေပြီး အကျပ်အတည်းကို ခံနိုင်ရည်ရှိရန် ခက်ခဲသော အနေအထားဖြစ်သည်။ လောင်စာဆီ တင်သွင်းမှုသည် မြန်မာ့သွင်းကုန် စုစုပေါင်း၏ သုံးပုံတစ်ပုံခန့်အထိ ရှိနေသဖြင့် ရေနံဈေးနှုန်း မြင့်တက်လာခြင်းသည် စက်သုံးဆီဆိုင်များသာမက နိုင်ငံခြားငွေ အကျပ်အတည်း၊ ကုန်စည်သယ်ယူပို့ဆောင်ရေးနှင့် အခြေခံစားသောက်ကုန် ဈေးနှုန်းကြီးမြင့်မှုကိုပါ တိုက်ရိုက် ရိုက်ခတ်စေမည်ဖြစ်သည်။ လက်ရှိတွင် အာဏာပိုင်များက စက်သုံးဆီ ရောင်းချမှု ကန့်သတ်ခြင်းနှင့် ဗဟိုဘဏ်မှ ဒေါ်လာများ ထုတ်ပေးခြင်းဖြင့် ဖြေရှင်းနေရသော်လည်း၊ ဤကဲ့သို့သော အရေးပေါ် စီမံချက်များသည် ရေရှည်အတွက် လုံလောက်သော ဖြေရှင်းချက် မဟုတ်ပေ။</p>
   </div>
 
-  <!-- PART FIVE -->
-  <div class="part"><span class="part-num">Five</span> ASEAN is on the front line</div>
+  <!-- ═══════════════════════════════════════════
+       PART FIVE
+  ═══════════════════════════════════════════ -->
+  <div class="part">
+    <span class="part-num">Five</span>
+    <span class="en">ASEAN is on the front line</span>
+    <span class="mm">အာဆီယံနိုင်ငံများ - အကျပ်အတည်း၏ ရှေ့တန်းမျက်နှာစာ</span>
+  </div>
 
-  <p class="prose">Within Southeast Asia, the dependence on Persian Gulf crude is acute. Most ASEAN nations have spent decades industrializing on the assumption that Gulf oil would always be available, affordable, and flowing. That assumption is now being stress-tested.</p>
+  <p class="prose en">Within Southeast Asia, the dependence on Persian Gulf crude is acute. Most ASEAN nations have spent decades industrializing on the assumption that Gulf oil would always be available, affordable, and flowing.</p>
+  <p class="prose mm">အရှေ့တောင်အာရှ ဒေသအတွင်း ပါရှန်းပင်လယ်ကွေ့ ရေနံစိမ်းအပေါ် မှီခိုအားထားမှုမှာ အလွန်မြင့်မားလျက်ရှိသည်။ အာဆီယံနိုင်ငံ အများစုသည် ပင်လယ်ကွေ့ဒေသမှ ရေနံကို အချိန်မရွေး ဈေးနှုန်းသက်သာစွာဖြင့် ရရှိနိုင်မည်ဟူသော ယူဆချက်အပေါ် အခြေခံ၍ ဆယ်စုနှစ်များစွာ စက်မှုထွန်းကားရေးကို ဖော်ဆောင်ခဲ့ကြခြင်း ဖြစ်သည်။</p>
 
-  <p class="chart-title">Middle East oil dependency — ASEAN countries (% of crude imports from Persian Gulf)</p>
+  <p class="chart-title en">Middle East oil dependency — ASEAN countries (% of crude imports from Persian Gulf)</p>
+  <p class="chart-title mm">အရှေ့အလယ်ပိုင်း ရေနံမှီခိုမှု — ASEAN နိုင်ငံများ (ပါရှန်းပင်လယ်ကွေ့မှ ရေနံတင်သွင်းမှု %)</p>
   <p class="chart-sub">Source: Maybank Investment Bank ASEAN analysis, 2024–2025</p>
   <div id="aseanChart" style="margin-bottom:2rem;"></div>
 
   <div class="insight">
-    <div class="insight-lbl">The Philippines in this story</div>
-    <div class="insight-text">95% of Philippine crude imports come from the Persian Gulf. The country has 50–60 days of reserves. Filipino jeepney drivers are already feeling this — fuel prices are rising while the government scrambles for alternatives.</div>
+    <div class="insight-lbl en">The Philippines in this story</div>
+    <div class="insight-lbl mm">ဖိလစ်ပိုင်နိုင်ငံပုံရိပ်</div>
+    <div class="insight-text en">95% of Philippine crude imports come from the Persian Gulf. The country has 50–60 days of reserves. Filipino jeepney drivers are already feeling this — fuel prices are rising while the government scrambles for alternatives.</div>
+    <div class="insight-text mm">ဖိလစ်ပိုင်နိုင်ငံ၏ ရေနံစိမ်းသွင်းကုန် ၉၅ ရာခိုင်နှုန်းမှာ ပါရှန်းပင်လယ်ကွေ့မှ လာခြင်းဖြစ်သည်။ နိုင်ငံအတွင်း ရက်ပေါင်း ၅၀ မှ ၆၀ စာခန့်သာ သိုလှောင်မှုရှိရာ လက်ရှိတွင် လောင်စာဆီဈေးနှုန်းများ မြင့်တက်လာမှုကြောင့် အခြေခံလူတန်းစားများ (ဥပမာ- Jeepney ယာဉ်မောင်းများ) မှာ ဒဏ်ကို စတင်ခံစားနေရပြီဖြစ်ပြီး အစိုးရအနေဖြင့်လည်း အစားထိုးစွမ်းအင်များ ရှာဖွေရန် ဖိအားပေးခြင်း ခံနေရသည်။</div>
   </div>
 
-  <!-- PART SIX -->
-  <div class="part"><span class="part-num">Six</span> The bigger picture</div>
+  <!-- ═══════════════════════════════════════════
+       PART SIX
+  ═══════════════════════════════════════════ -->
+  <div class="part">
+    <span class="part-num">Six</span>
+    <span class="en">The bigger picture</span>
+    <span class="mm">ခြုံငုံသုံးသပ်ချက်</span>
+  </div>
 
-  <blockquote>"The shale revolution gave America energy independence. What it quietly did at the same time was transfer 50 years of geopolitical risk onto Asia — and Asia had no shale revolution of its own."</blockquote>
+  <blockquote>
+    <span class="en">"The shale revolution gave America energy independence. What it quietly did at the same time was transfer 50 years of geopolitical risk onto Asia — and Asia had no shale revolution of its own."</span>
+    <span class="mm">"Shale တော်လှန်ရေးသည် အမေရိကန်အား စွမ်းအင်ဖူလုံမှု ပေးနိုင်ခဲ့သော်လည်း၊ တစ်ဖက်တွင်မူ နှစ်ပေါင်း ၅၀ ကြာ ပထဝီနိုင်ငံရေးဆိုင်ရာ စွန့်စားရမှုအားလုံးကို အာရှတိုက်ဆီသို့ တိတ်တဆိတ် လွှဲပြောင်းပေးလိုက်ခြင်း ဖြစ်သည်။ အာရှတွင်မူ ထိုကဲ့သို့သော စွမ်းအင်တော်လှန်ရေးမျိုး မရှိခဲ့ပေ။"</span>
+  </blockquote>
 
-  <p class="prose">Every major oil shock in history has generated a structural policy response. The 1973 embargo accelerated France's nuclear programme. The 1979 Iranian Revolution drove Japan's aggressive energy-efficiency push and reserve-building. The current disruption arrives in a more complicated moment: Asia is electrifying faster than ever, but the transition is incomplete. Coal, oil, and gas still run the region's factories, farms, and transport networks.</p>
+  <p class="prose en">Every major oil shock in history has generated a structural policy response. The 1973 embargo accelerated France's nuclear programme. The 1979 Iranian Revolution drove Japan's energy-efficiency push. This disruption arrives in a more complicated moment: Asia is electrifying, but the transition is incomplete.</p>
+  <p class="prose mm">သမိုင်းတစ်လျှောက် ဖြစ်ပွားခဲ့သော ရေနံအကျပ်အတည်းတိုင်းသည် နိုင်ငံအသီးသီး၏ မူဝါဒပိုင်းဆိုင်ရာ တုံ့ပြန်ပြောင်းလဲမှုများကို ဖြစ်ပေါ်စေခဲ့သည်။ ၁၉၇၃ ခုနှစ် ရေနံပိတ်ဆို့မှုသည် ပြင်သစ်နိုင်ငံ၏ နျူကလီးယားစွမ်းအင် အစီအစဉ်ကို အရှိန်မြှင့်ပေးခဲ့ပြီး၊ ၁၉၇၉ ခုနှစ် အီရန်တော်လှန်ရေးသည် ဂျပန်နိုင်ငံ၏ စွမ်းအင်ချွေတာရေးမူဝါဒများကို တွန်းအားဖြစ်စေခဲ့သည်။ ယခုကြုံတွေ့နေရသော အနှောင့်အယှက်မှာမူ ပိုမိုရှုပ်ထွေးသော အခြေအနေတွင် ပေါ်ပေါက်လာခြင်းဖြစ်သည်။ အာရှတိုက်သည် လျှပ်စစ်ဓာတ်အား အသုံးပြုမှုကို ကူးပြောင်းမြှင့်တင်နေသော်လည်း၊ ထိုအကူးအပြောင်းမှာ အပြည့်အဝ မပြီးမြောက်သေးသည့် အချိန်ပင် ဖြစ်သည်။</p>
 
-  <p class="prose">For Myanmar, the Philippines, Vietnam, and Bangladesh — countries without deep reserves, without diversified suppliers, and without the fiscal space to absorb price shocks — the urgency is not abstract. It is already at the petrol station, at the fertilizer supplier, at the farm gate. A fuel shortage is not only an energy problem. It is an inflation problem, a food security problem, and a political stability problem, all arriving at once.</p>
+  <p class="prose en">For Myanmar, the Philippines, Vietnam, and Bangladesh — the urgency is not abstract. It is already at the petrol station, at the fertilizer supplier, at the farm gate.</p>
+  <p class="prose mm">မြန်မာ၊ ဖိလစ်ပိုင်၊ ဗီယက်နမ်နှင့် ဘင်္ဂလားဒေ့ရှ်နိုင်ငံတို့အတွက်မူ ဤအရေးပေါ်အခြေအနေမှာ စိတ်ကူးယဉ်သက်သက် မဟုတ်တော့ဘဲ စက်သုံးဆီဆိုင်များ၊ ဓာတ်မြေဩဇာ အရောင်းဆိုင်များနှင့် လယ်ယာလုပ်ငန်းခွင်များအထိ လက်တွေ့ကျကျ ရိုက်ခတ်လျက်ရှိနေပြီ ဖြစ်သည်။</p>
 
-  <p class="prose">The countries that emerge from this crisis in a stronger position will be the ones that treat it as a forcing function — not a temporary disruption to wait out, but a structural signal that the old energy geography no longer holds.</p>
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <span class="en"><strong>Note:</strong> This is a personal data exploration project made for curiosity and learning. While sources are linked and data is drawn from reputable outlets, I am not a professional journalist or data analyst. Some figures are estimates or approximations. Always verify with the original sources before citing.</span>
+    <span class="mm"><strong>မှတ်ချက်:</strong> ဤပရောဂျက်သည် သိချင်စိတ်နှင့် လေ့လာသင်ယူမှုအတွက် ကိုယ်တိုင် ပြုလုပ်ထားခြင်း ဖြစ်သည်။ အချက်အလက်များကို ယုံကြည်ရသော ရင်းမြစ်များမှ ရယူထားသော်လည်း၊ ကျွန်မသည် ကျွမ်းကျင်သော သတင်းထောက် သို့မဟုတ် ဒေတာပညာရှင် မဟုတ်ပါ။ အချို့သော ကိန်းဂဏန်းများသည် အနီးစပ်ဆုံး ခန့်မှန်းချက်များသာ ဖြစ်သည်။ အချက်အလက်များကို ကိုးကားအသုံးပြုလိုပါက မူရင်းရင်းမြစ်များနှင့် ပြန်လည်တိုက်ဆိုင် စစ်ဆေးရန် အကြံပြုပါသည်။ </span>
+  </div>
 
   <!-- SOURCES -->
   <div class="sources">
-    <p class="sources-title">Data sources &amp; references</p>
+    <p class="sources-title en">Data sources &amp; references</p>
+    <p class="sources-title mm">ဒေတာအရင်းအမြစ်များနှင့် ကိုးကားချက်များ</p>
 
-    <div class="source-item"><span class="source-num">1</span><div>
-      <a class="source-link" href="https://www.visualcapitalist.com/charted-oil-trade-through-the-strait-of-hormuz-by-country/" target="_blank">Charted: Oil Trade Through the Strait of Hormuz by Country</a>
-      <span class="source-meta">Visual Capitalist · EIA data, Q1 2025 <span class="source-tag">Flow %</span></span>
-    </div></div>
+    <div class="source-item"><span class="source-num">1</span><div><a class="source-link" href="https://www.visualcapitalist.com/charted-oil-trade-through-the-strait-of-hormuz-by-country/" target="_blank">Charted: Oil Trade Through the Strait of Hormuz by Country</a><span class="source-meta">Visual Capitalist · EIA data, Q1 2025 <span class="source-tag">Flow %</span></span></div></div>
+    <div class="source-item"><span class="source-num">2</span><div><a class="source-link" href="https://www.eia.gov/dnav/pet/pet_move_expc_a_epc0_eex_mbblpd_m.htm" target="_blank">Crude Oil Exports by Destination</a><span class="source-meta">U.S. Energy Information Administration (EIA) <span class="source-tag">Primary</span></span></div></div>
+    <div class="source-item"><span class="source-num">3</span><div><a class="source-link" href="https://www.opec.org/assets/assetdb/asb-2025.pdf" target="_blank">OPEC Annual Statistical Bulletin 2025</a><span class="source-meta">OPEC · Full-year 2024 data <span class="source-tag">Regional flows</span></span></div></div>
+    <div class="source-item"><span class="source-num">4</span><div><a class="source-link" href="https://www.atlanticcouncil.org/dispatches/what-a-middle-east-oil-and-lng-crisis-means-for-china-and-east-asia/" target="_blank">What a Middle East oil and LNG crisis means for China and East Asia</a><span class="source-meta">Atlantic Council · March 2026 <span class="source-tag">Reserves</span></span></div></div>
+    <div class="source-item"><span class="source-num">5</span><div><a class="source-link" href="https://vir.com.vn/asean-countries-exposed-by-middle-east-oil-dependence-149076.html" target="_blank">ASEAN countries exposed by Middle East oil dependence</a><span class="source-meta">Vietnam Investment Review · Maybank IB, March 2026 <span class="source-tag">ASEAN</span></span></div></div>
+    <div class="source-item"><span class="source-num">6</span><div><a class="source-link" href="https://www.aljazeera.com/news/2026/3/23/which-countries-have-strategic-oil-reserves-and-how-much" target="_blank">Which countries have strategic oil reserves — and how much?</a><span class="source-meta">Al Jazeera · March 23, 2026 <span class="source-tag">Reserves</span></span></div></div>
+    <div class="source-item"><span class="source-num">7</span><div><a class="source-link" href="https://www.osw.waw.pl/en/publikacje/analyses/2026-03-06/attack-iran-challenges-oil-market" target="_blank">Attack on Iran: challenges for the oil market</a><span class="source-meta">OSW Centre for Eastern Studies · March 6, 2026 <span class="source-tag">Crisis</span></span></div></div>
+    <div class="source-item"><span class="source-num">8</span><div><a class="source-link" href="https://www.weforum.org/stories/2026/03/the-global-price-tag-of-war-in-the-middle-east/" target="_blank">The global price tag of war in the Middle East</a><span class="source-meta">World Economic Forum · March 2026 <span class="source-tag">Impact</span></span></div></div>
+    <div class="source-item"><span class="source-num">9</span><div><a class="source-link" href="https://www.csmonitor.com/World/Asia-Pacific/2026/0313/Asia-Iran-war-gas-shortages" target="_blank">Asian countries call for belt-tightening as war closes critical oil shipping routes</a><span class="source-meta">Christian Science Monitor · March 13, 2026 <span class="source-tag">Crisis</span></span></div></div>
+    <div class="source-item"><span class="source-num">10</span><div><a class="source-link" href="https://ispmyanmar.com/op2026-01/" target="_blank">Global Oil Shock and Myanmar's Energy Security</a><span class="source-meta">ISP-Myanmar · March 2026 <span class="source-tag">Myanmar</span></span></div></div>
+    <div class="source-item"><span class="source-num">11</span><div><a class="source-link" href="https://hir.harvard.edu/a-crude-restructuring-how-the-american-shale-revolution-is-changing-the-geopolitical-calculus-in-the-middle-east/" target="_blank">A Crude Restructuring: How America's Shale Revolution Changes the Calculus in the Middle East</a><span class="source-meta">Harvard International Review <span class="source-tag">Geopolitics</span></span></div></div>
 
-    <div class="source-item"><span class="source-num">2</span><div>
-      <a class="source-link" href="https://www.eia.gov/dnav/pet/pet_move_expc_a_epc0_eex_mbblpd_m.htm" target="_blank">Crude Oil Exports by Destination</a>
-      <span class="source-meta">U.S. Energy Information Administration (EIA) <span class="source-tag">Primary</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">3</span><div>
-      <a class="source-link" href="https://www.opec.org/assets/assetdb/asb-2025.pdf" target="_blank">OPEC Annual Statistical Bulletin 2025</a>
-      <span class="source-meta">OPEC · Full-year 2024 data <span class="source-tag">Regional flows</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">4</span><div>
-      <a class="source-link" href="https://www.atlanticcouncil.org/dispatches/what-a-middle-east-oil-and-lng-crisis-means-for-china-and-east-asia/" target="_blank">What a Middle East oil and LNG crisis means for China and East Asia</a>
-      <span class="source-meta">Atlantic Council · March 2026 <span class="source-tag">Reserves</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">5</span><div>
-      <a class="source-link" href="https://vir.com.vn/asean-countries-exposed-by-middle-east-oil-dependence-149076.html" target="_blank">ASEAN countries exposed by Middle East oil dependence</a>
-      <span class="source-meta">Vietnam Investment Review · Maybank IB, March 2026 <span class="source-tag">ASEAN</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">6</span><div>
-      <a class="source-link" href="https://www.aljazeera.com/news/2026/3/23/which-countries-have-strategic-oil-reserves-and-how-much" target="_blank">Which countries have strategic oil reserves — and how much?</a>
-      <span class="source-meta">Al Jazeera · March 23, 2026 <span class="source-tag">Reserves</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">7</span><div>
-      <a class="source-link" href="https://www.osw.waw.pl/en/publikacje/analyses/2026-03-06/attack-iran-challenges-oil-market" target="_blank">Attack on Iran: challenges for the oil market</a>
-      <span class="source-meta">OSW Centre for Eastern Studies · March 6, 2026 <span class="source-tag">Crisis</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">8</span><div>
-      <a class="source-link" href="https://www.weforum.org/stories/2026/03/the-global-price-tag-of-war-in-the-middle-east/" target="_blank">The global price tag of war in the Middle East</a>
-      <span class="source-meta">World Economic Forum · March 2026 <span class="source-tag">Impact</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">9</span><div>
-      <a class="source-link" href="https://www.csmonitor.com/World/Asia-Pacific/2026/0313/Asia-Iran-war-gas-shortages" target="_blank">Asian countries call for belt-tightening as war closes critical oil shipping routes</a>
-      <span class="source-meta">Christian Science Monitor · March 13, 2026 <span class="source-tag">Crisis</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">10</span><div>
-      <a class="source-link" href="https://www.france24.com/en/middle-east/20260311-iea-to-release-record-amount-emergency-oil-reserves-middle-east-war-rattles-markets" target="_blank">IEA to release record amount of emergency oil reserves</a>
-      <span class="source-meta">France 24 · March 11, 2026 <span class="source-tag">Reserves</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">11</span><div>
-      <a class="source-link" href="https://energynewsbeat.co/hormuz-dependency-by-country-a-critical-energy-chokepoint-under-scrutiny/" target="_blank">Hormuz Dependency by Country: A Critical Energy Chokepoint Under Scrutiny</a>
-      <span class="source-meta">Energy News Beat · 2025–2026 <span class="source-tag">Dependency %</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">12</span><div>
-      <a class="source-link" href="https://ispmyanmar.com/op2026-01/" target="_blank">Global Oil Shock and Myanmar's Energy Security</a>
-      <span class="source-meta">ISP-Myanmar · March 2026 <span class="source-tag">Myanmar</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">13</span><div>
-      <a class="source-link" href="https://www.gmanetwork.com/news/money/economy/979463/ph-other-asian-countries-limit-impact-of-oil-price-hike-supply-disruption/story/" target="_blank">PH, other Asian countries move to limit impact of oil price hike</a>
-      <span class="source-meta">GMA News · March 2026 <span class="source-tag">ASEAN · Crisis</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">14</span><div>
-      <a class="source-link" href="https://energynews.oedigital.com/crude-oil/2026/03/04/why-is-asia-so-dependent-on-middle-eastern-oil-sources" target="_blank">Why is Asia so dependent on Middle Eastern oil sources?</a>
-      <span class="source-meta">Energy News · OE Digital · March 2026 <span class="source-tag">Geopolitics</span></span>
-    </div></div>
-
-    <div class="source-item"><span class="source-num">15</span><div>
-      <a class="source-link" href="https://hir.harvard.edu/a-crude-restructuring-how-the-american-shale-revolution-is-changing-the-geopolitical-calculus-in-the-middle-east/" target="_blank">A Crude Restructuring: How America's Shale Revolution Changes the Calculus in the Middle East</a>
-      <span class="source-meta">Harvard International Review <span class="source-tag">Shale · Geopolitics</span></span>
-    </div></div>
-
-    <p class="sources-note">All data reflects 2024–Q1 2025 figures unless a more recent source is cited. Live crisis context reflects reporting as of March 26, 2026.</p>
+    <p class="sources-note en">All data reflects 2024–Q1 2025 figures unless a more recent source is cited. Live crisis context reflects reporting as of March 26, 2026.</p>
+    <p class="sources-note mm">အချက်အလက် ရင်းမြစ်များအား သီးခြားဖော်ပြထားခြင်း မရှိပါက ဤဒေတာများအားလုံးသည် ၂၀၂၄ ခုနှစ်မှ ၂၀၂၅ ခုနှစ် ပထမသုံးလပတ်အထိ ကိန်းဂဏန်းများ ဖြစ်ပါသည်။ လက်ရှိဖြစ်ပေါ်နေသော အကျပ်အတည်းဆိုင်ရာ အခြေအနေများကို ၂၀၂၆ ခုနှစ်၊ မတ်လ ၂၆ ရက်နေ့အထိ နောက်ဆုံးရရှိထားသည့် သတင်းတင်ပြချက်များအပေါ် အခြေခံ၍ ဖော်ပြထားခြင်း ဖြစ်ပါသည်။</p>
   </div>
 
-</div>
+</div><!-- end .story -->
 
 <script>
 const gridC = 'rgba(26,24,20,0.07)';
 const textC = '#9A9590';
 
-new Chart(document.getElementById('flowChart'), {
+/* ─── LANGUAGE TOGGLE ─── */
+function setLang(lang) {
+  document.body.classList.toggle('lang-mm', lang === 'mm');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-mm').classList.toggle('active', lang === 'mm');
+}
+
+/* ─── REGION BARS ─── */
+// ✏️ EDIT ZONE: region bar labels and values
+const regionData = [
+  { en: 'Asia',     mm: 'အာရှ',          value: 72, color: '#C4622D' },
+  { en: 'Europe',   mm: 'ဥရောပ',         value: 18, color: '#E8956D' },
+  { en: 'Americas', mm: 'အမေရိကတိုက်',   value: 6,  color: '#B4B2A9' },
+  { en: 'Other',    mm: 'အခြား',         value: 4,  color: '#B4B2A9' },
+];
+const rbEl = document.getElementById('regionBars');
+regionData.forEach(function(d) {
+  rbEl.innerHTML += `
+    <div class="rbar">
+      <div class="rbar-label"><span class="en">${d.en}</span><span class="mm">${d.mm}</span></div>
+      <div class="rbar-track"><div class="rbar-fill" style="width:${d.value}%;background:${d.color};"></div></div>
+      <div class="rbar-value" style="color:${d.color};">${d.value}%</div>
+    </div>`;
+});
+
+/* ─── GEOPOLITICS TIMELINE ─── */
+// ✏️ EDIT ZONE: timeline events — edit en/mm title and desc
+const geoEvents = [
+  {
+    year: '1973',
+    enTitle: 'The oil shock that changed everything for Asia',
+    mmTitle: 'အာရှစွမ်းအင်ကဏ္ဍ၏ အချိုးအကွေ့ ဖြစ်စေခဲ့သော ရေနံအကျပ်အတည်း',
+    enDesc: 'OPEC\'s oil embargo hits Western nations hardest, but Japan — importing 99% of its oil — nearly collapses economically. Asia locks in long-term Gulf supply deals. The dependency is institutionalized.',
+    mmDesc: 'OPEC ၏ ရေနံတင်ပို့မှု ပိတ်ဆို့ခြင်း (Oil Embargo) သည် အနောက်နိုင်ငံများကို အကြီးအကျယ် ရိုက်ခတ်ခဲ့သော်လည်း ရေနံ ၉၉ ရာခိုင်နှုန်း တင်သွင်းနေရသော ဂျပန်နိုင်ငံမှာ စီးပွားရေးအရ ပြိုလဲလုနီးပါး ဖြစ်ခဲ့ရသည်။ ထိုအချိန်မှစ၍ အာရှနိုင်ငံများသည် အရှေ့အလယ်ပိုင်းဒေသနှင့် ရေရှည် မဟာဗျူဟာမြောက် သဘောတူညီချက်များ ချုပ်ဆိုခဲ့ကြရာ ပင်လယ်ကွေ့အပေါ် မှီခိုမှုမှာ စနစ်တကျ အမြစ်တွယ် လာခဲ့သည်။',
+  },
+  {
+    year: '1980s',
+    enTitle: 'The US becomes the Gulf\'s security guarantor',
+    mmTitle: 'အမေရိကန်သည် ပင်လယ်ကွေ့၏ လုံခြုံရေးအာမခံအဖြစ် ရပ်တည်လာခြင်း',
+    enDesc: 'America stations naval forces in the Gulf and guarantees free oil flow — in exchange for Gulf states pricing oil in US dollars. Asia benefits from this security umbrella without paying for it.',
+    mmDesc: 'အမေရိကန်သည် ပင်လယ်ကွေ့ဒေသတွင် ရေတပ်အင်အားစုများ အခြေစိုက်စခန်းချကာ ဆော်ဒီအာရေဗျနှင့် လုံခြုံရေးဆိုင်ရာ မဟာဗျူဟာများ ချမှတ်ပြီး ရေနံစီးဆင်းမှု လုံခြုံစိတ်ချရစေရန် အာမခံပေးခဲ့သည်။ ယင်းသို့ ကာကွယ်ပေးမှုအတွက် အပြန်အလှန်အားဖြင့် ပင်လယ်ကွေ့နိုင်ငံများက ရေနံဈေးနှုန်းကို အမေရိကန်ဒေါ်လာဖြင့်သာ သတ်မှတ်ရန် သဘောတူညီခဲ့ကြသည်။ အာရှနိုင်ငံများမှာမူ အဆိုပါ လုံခြုံရေးအကာအကွယ်၏ အကျိုးကျေးဇူးကို စိုက်ထုတ်ကုန်ကျစရိတ် မရှိဘဲ အခမဲ့ ရရှိခံစားခဲ့ကြသည်။',
+  },
+  {
+    year: '1993',
+    enTitle: 'China crosses the line — from exporter to importer',
+    mmTitle: 'တရုတ်နိုင်ငံ၏ စွမ်းအင်ကဏ္ဍ အချိုးအကွေ့ — တင်ပို့သူမှ တင်သွင်းသူသို့',
+    enDesc: 'China\'s domestic oil consumption exceeds production for the first time. It begins sourcing aggressively from the Middle East. By the 2010s, China becomes the world\'s largest crude importer.',
+    mmDesc: 'တရုတ်နိုင်ငံ၏ ပြည်တွင်းရေနံ သုံးစွဲမှုသည် ထုတ်လုပ်မှုထက် ပထမဆုံးအကြိမ် ကျော်လွန်သွားခဲ့သည်။ ထိုအချိန်မှစ၍ ဆော်ဒီအာရေဗျ၊ အီရန်နှင့် အီရတ်တို့နှင့် ကုန်သွယ်ရေးစာချုပ်များ ချုပ်ဆိုကာ အရှေ့အလယ်ပိုင်းရေနံကို အရှိန်အဟုန်ဖြင့် စတင်တင်သွင်းခဲ့သည်။ ၂၀၁၀ ပြည့်လွန်နှစ်များသို့ ရောက်သောအခါ တရုတ်နိုင်ငံသည် ကမ္ဘာ့အကြီးဆုံး ရေနံစိမ်းတင်သွင်းသူ ဖြစ်လာခဲ့သည်။',
+  },
+  {
+    year: '2008–15',
+    enTitle: 'The US shale revolution — and its quiet geopolitical consequence',
+    mmTitle: 'အမေရိကန် Shale တော်လှန်ရေးနှင့် ပထဝီနိုင်ငံရေး အလှည့်အပြောင်း',
+    enDesc: 'US production doubles. By 2020 the US becomes a net oil exporter. Washington begins stepping back from Middle East security. The risk doesn\'t disappear — it transfers to Asia.',
+    mmDesc: 'အမေရိကန်၏ ရေနံထုတ်လုပ်မှုသည် Shale နည်းပညာကြောင့် နှစ်ဆတိုးလာခဲ့ပြီး ၂၀၂၀ ပြည့်နှစ်တွင် အသားတင် ရေနံတင်ပို့သူ (Net Exporter) သို့ ရောက်ရှိခဲ့သည်။ ဝါရှင်တန်သည် အရှေ့အလယ်ပိုင်းဒေသ၏ လုံခြုံရေးအာမခံအဖြစ်မှ တဖြည်းဖြည်း မဟာဗျူဟာမြောက် ဆုတ်ခွာလာခဲ့သည်။ သို့သော် ရေနံလမ်းကြောင်းများ၏ အန္တရာယ်မှာ ပျောက်ကွယ်သွားခြင်းမဟုတ်ဘဲ အမေရိကန်ထံမှ အာရှနိုင်ငံများထံသို့သာ တာဝန်နှင့် ဘေးအန္တရာယ် ပြောင်းလဲရောက်ရှိသွားခြင်း ဖြစ်သည်။',
+  },
+  {
+    year: '2020s',
+    enTitle: 'Asia industrialises faster than it can diversify',
+    mmTitle: 'အာရှ၏ စက်မှုကဏ္ဍ အရှိန်အဟုန်နှင့် စွမ်းအင်လိုအပ်ချက်',
+    enDesc: 'China, India, Vietnam, Bangladesh and the Philippines drive the world\'s fastest economic growth — all powered by imported Gulf oil. Renewables grow but cannot displace baseload demand fast enough.',
+    mmDesc: 'တရုတ်၊ အိန္ဒိယ၊ ဗီယက်နမ်၊ ဘင်္ဂလားဒေ့ရှ်နှင့် ဖိလစ်ပိုင်နိုင်ငံတို့သည် ကမ္ဘာ့အရှိန်အဟုန်အပြင်းဆုံး စီးပွားရေးတိုးတက်မှုကို ဖော်ဆောင်နေကြပြီး ထိုတိုးတက်မှုအတွက် လိုအပ်သောစွမ်းအင်ကို ပင်လယ်ကွေ့မှ တင်သွင်းသည့် ရေနံဖြင့် အဓိက လည်ပတ်နေရသည်။ ပြန်လည်ပြည့်ဖြိုးမြဲစွမ်းအင်များ ဖွံ့ဖြိုးလာသော်လည်း စက်မှုကဏ္ဍအတွက် အခြေခံကျသော ပင်မစွမ်းအင်လိုအပ်ချက် (Baseload Demand) ကို အပြည့်အဝ အစားထိုးနိုင်ခြင်း မရှိသေးပေ။',
+  },
+  {
+    year: '2026',
+    enTitle: 'The bill comes due',
+    mmTitle: 'ပေးဆပ်ရမည့် အချိန်ကာလ (သို့မဟုတ်) အကျိုးဆက်များကို ရင်ဆိုင်ရချိန်',
+    enDesc: 'The US-Iran war shuts the Strait of Hormuz. The US, which receives just 2.5% of Hormuz oil, feels a price bump. Asia, which receives 89%, faces an existential supply crisis.',
+    mmDesc: 'အမေရိကန်-အီရန် စစ်ပွဲကြောင့် ဟော်မုဇ်ရေလက်ကြား ပိတ်ဆို့သွားခဲ့သည်။ ထိုလမ်းကြောင်းမှ ရေနံ ၂.၅% သာ တင်သွင်းသော အမေရိကန်အတွက်မူ စျေးနှုန်းမြင့်တက်မှုကိုသာ ခံစားရသော်လည်း၊ ရေနံ ၈၉% အထိ တင်သွင်းနေရသော အာရှတိုက်အတွက်မူ ရှင်သန်ရပ်တည်ရေးကို ခြိမ်းခြောက်လာသည့် စွမ်းအင်ထောက်ပံ့မှု အကျပ်အတည်းနှင့် ရင်ဆိုင်နေရပြီဖြစ်သည်။',
+  },
+];
+
+const geoEl = document.getElementById('geoTimeline');
+geoEvents.forEach(function(e) {
+  geoEl.innerHTML += `
+    <div class="geo-event">
+      <div class="geo-year">${e.year}</div>
+      <div class="geo-body">
+        <div class="geo-title"><span class="en">${e.enTitle}</span><span class="mm">${e.mmTitle}</span></div>
+        <div class="geo-desc"><span class="en">${e.enDesc}</span><span class="mm">${e.mmDesc}</span></div>
+      </div>
+    </div>`;
+});
+
+/* ─── FLOW CHART (DOUGHNUT) ─── */
+// ✏️ EDIT ZONE: flow chart labels and values
+const flowLabels = {
+  en: ['China (37.7%)', 'India (14.7%)', 'Japan (10.9%)', 'South Korea (12.0%)', 'Other Asia (13.9%)', 'Rest of world (10.8%)'],
+  mm: ['တရုတ် (၃၇.၇%)', 'အိန္ဒိယ (၁၄.၇%)', 'ဂျပန် (၁၀.၉%)', 'တောင်ကိုရီးယား (၁၂.၀%)', 'အခြားအာရှ (၁၃.၉%)', 'ကမ္ဘာ့အခြားဒေသများ (၁၀.၈%)'],
+};
+const flowColors = ['#C4622D','#E8956D','#1D9E75','#5DCAA5','#7F77DD','#B4B2A9'];
+const flowValues = [37.7, 14.7, 10.9, 12.0, 13.9, 10.8];
+
+// build legend
+const legendEl = document.getElementById('flowLegend');
+flowLabels.en.forEach(function(lbl, i) {
+  legendEl.innerHTML += `
+    <span class="legend-item">
+      <span class="swatch" style="background:${flowColors[i]};"></span>
+      <span class="en">${flowLabels.en[i]}</span>
+      <span class="mm">${flowLabels.mm[i]}</span>
+    </span>`;
+});
+
+const flowChart = new Chart(document.getElementById('flowChart'), {
   type: 'doughnut',
   data: {
-    labels: ['China (37.7%)', 'India (14.7%)', 'Japan (10.9%)', 'South Korea (12.0%)', 'Other Asia (13.9%)', 'Rest of world (10.8%)'],
-    datasets: [{
-      data: [37.7, 14.7, 10.9, 12.0, 13.9, 10.8],
-      backgroundColor: ['#C4622D','#E8956D','#1D9E75','#5DCAA5','#7F77DD','#B4B2A9'],
-      borderWidth: 3, borderColor: '#FAF9F6'
-    }]
+    labels: flowLabels.en,
+    datasets: [{ data: flowValues, backgroundColor: flowColors, borderWidth: 3, borderColor: '#FAF9F6' }]
   },
   options: {
     responsive: true, maintainAspectRatio: false, cutout: '60%',
@@ -579,15 +508,28 @@ new Chart(document.getElementById('flowChart'), {
   }
 });
 
-new Chart(document.getElementById('exportChart'), {
+// update chart labels on lang switch
+const origSetLang = setLang;
+setLang = function(lang) {
+  origSetLang(lang);
+  flowChart.data.labels = lang === 'mm' ? flowLabels.mm : flowLabels.en;
+  flowChart.update();
+};
+
+/* ─── EXPORT CHART ─── */
+// ✏️ EDIT ZONE: exporter country names and percentages
+const exportData = {
+  en: ['Saudi Arabia', 'Iraq', 'UAE', 'Kuwait', 'Iran', 'Qatar'],
+  mm: ['ဆော်ဒီအာရေဗျ', 'အီရတ်', 'ယူအေအီး', 'ကူဝိတ်', 'အီရန်', 'ကာတာ'],
+  values: [37.2, 22.1, 14.8, 10.5, 8.6, 6.8],
+  colors: ['#C4622D','#D9764A','#E8956D','#F0B090','#7F77DD','#AFA9EC'],
+};
+
+const exportChart = new Chart(document.getElementById('exportChart'), {
   type: 'bar',
   data: {
-    labels: ['Saudi Arabia', 'Iraq', 'UAE', 'Kuwait', 'Iran', 'Qatar'],
-    datasets: [{
-      data: [37.2, 22.1, 14.8, 10.5, 8.6, 6.8],
-      backgroundColor: ['#C4622D','#D9764A','#E8956D','#F0B090','#7F77DD','#AFA9EC'],
-      borderRadius: 5, borderSkipped: false
-    }]
+    labels: exportData.en,
+    datasets: [{ data: exportData.values, backgroundColor: exportData.colors, borderRadius: 5, borderSkipped: false }]
   },
   options: {
     responsive: true, maintainAspectRatio: false,
@@ -599,77 +541,90 @@ new Chart(document.getElementById('exportChart'), {
   }
 });
 
-// ASEAN — pure CSS horizontal bar chart
+setLang = (function(prev) {
+  return function(lang) {
+    prev(lang);
+    exportChart.data.labels = lang === 'mm' ? exportData.mm : exportData.en;
+    exportChart.update();
+  };
+})(setLang);
+
+/* ─── ASEAN CSS CHART ─── */
+// ✏️ EDIT ZONE: ASEAN country names (en + mm) and dependency %
 const aseanData = [
-  { label: 'Philippines', value: 95, color: '#C4622D' },
-  { label: 'Vietnam',     value: 88, color: '#C4622D' },
-  { label: 'Myanmar',     value: 70, color: '#D9764A' },
-  { label: 'Malaysia',    value: 69, color: '#E8956D' },
-  { label: 'Thailand',    value: 59, color: '#E8956D' },
-  { label: 'Singapore',   value: 52, color: '#F0B090' },
-  { label: 'Indonesia',   value: 20, color: '#B4B2A9' },
+  { en: 'Philippines', mm: 'ဖိလစ်ပိုင်',  value: 95, color: '#C4622D' },
+  { en: 'Vietnam',     mm: 'ဗီယက်နမ်',    value: 88, color: '#C4622D' },
+  { en: 'Myanmar',     mm: 'မြန်မာ',       value: 70, color: '#D9764A' },
+  { en: 'Malaysia',    mm: 'မလေးရှား',     value: 69, color: '#E8956D' },
+  { en: 'Thailand',    mm: 'ထိုင်း',       value: 59, color: '#E8956D' },
+  { en: 'Singapore',   mm: 'စင်ကာပူ',     value: 52, color: '#F0B090' },
+  { en: 'Indonesia',   mm: 'အင်ဒိုနီးရှား', value: 20, color: '#B4B2A9' },
 ];
 
-const aseanEl = document.getElementById('aseanChart');
-aseanEl.style.cssText = 'font-family: Geist, sans-serif; padding: 4px 0;';
+function buildAsean(lang) {
+  const el = document.getElementById('aseanChart');
+  el.innerHTML = '';
+  el.style.cssText = 'font-family:Geist,sans-serif;padding:4px 0;';
+  const ticksRow = document.createElement('div');
+  ticksRow.style.cssText = 'display:grid;grid-template-columns:110px 1fr;gap:0;margin-bottom:8px;';
+  ticksRow.innerHTML = '<div></div><div style="display:flex;justify-content:space-between;">' +
+    [0,25,50,75,100].map(function(t){ return '<span style="font-size:11px;color:#9A9590;">' + t + '%</span>'; }).join('') + '</div>';
+  el.appendChild(ticksRow);
+  aseanData.forEach(function(d) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:grid;grid-template-columns:110px 1fr;gap:0;align-items:center;margin-bottom:9px;';
+    const labelEl = document.createElement('div');
+    labelEl.textContent = lang === 'mm' ? d.mm : d.en;
+    labelEl.style.cssText = 'font-size:12px;color:#5A564F;text-align:right;padding-right:12px;line-height:1;';
+    const trackEl = document.createElement('div');
+    trackEl.style.cssText = 'background:#EAE8E3;border-radius:4px;height:26px;overflow:hidden;';
+    const fillEl = document.createElement('div');
+    fillEl.style.cssText = 'width:' + d.value + '%;height:100%;background:' + d.color + ';border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;';
+    const valEl = document.createElement('span');
+    valEl.textContent = d.value + '%';
+    valEl.style.cssText = 'font-size:11px;font-weight:500;color:#fff;';
+    fillEl.appendChild(valEl);
+    trackEl.appendChild(fillEl);
+    row.appendChild(labelEl);
+    row.appendChild(trackEl);
+    el.appendChild(row);
+  });
+}
+buildAsean('en');
 
-const ticksRow = document.createElement('div');
-ticksRow.style.cssText = 'display:grid; grid-template-columns:100px 1fr; gap:0; margin-bottom:8px;';
-ticksRow.innerHTML = '<div></div><div style="display:flex;justify-content:space-between;">' +
-  [0,25,50,75,100].map(t => '<span style="font-size:11px;color:#9A9590;">' + t + '%</span>').join('') + '</div>';
-aseanEl.appendChild(ticksRow);
+setLang = (function(prev) {
+  return function(lang) {
+    prev(lang);
+    buildAsean(lang);
+  };
+})(setLang);
 
-aseanData.forEach(function(d) {
-  var row = document.createElement('div');
-  row.style.cssText = 'display:grid; grid-template-columns:100px 1fr; gap:0; align-items:center; margin-bottom:9px;';
-
-  var labelEl = document.createElement('div');
-  labelEl.textContent = d.label;
-  labelEl.style.cssText = 'font-size:12px; color:#5A564F; text-align:right; padding-right:12px; line-height:1;';
-
-  var trackEl = document.createElement('div');
-  trackEl.style.cssText = 'background:#EAE8E3; border-radius:4px; height:26px; overflow:hidden;';
-
-  var fillEl = document.createElement('div');
-  fillEl.style.cssText = 'width:' + d.value + '%; height:100%; background:' + d.color + '; border-radius:4px; display:flex; align-items:center; justify-content:flex-end; padding-right:8px;';
-
-  var valEl = document.createElement('span');
-  valEl.textContent = d.value + '%';
-  valEl.style.cssText = 'font-size:11px; font-weight:500; color:#fff;';
-
-  fillEl.appendChild(valEl);
-  trackEl.appendChild(fillEl);
-  row.appendChild(labelEl);
-  row.appendChild(trackEl);
-  aseanEl.appendChild(row);
-});
-
+/* ─── VULNERABILITY GRID ─── */
+// ✏️ EDIT ZONE: country names (en + mm), reserve days, dependency note
 const vulnData = [
-  { country: 'Japan',       days: 254, dep: '95% from Middle East',       color: '#1D9E75', pct: 100, highlight: false },
-  { country: 'South Korea', days: 210, dep: '70% from Middle East',       color: '#1D9E75', pct: 83,  highlight: false },
-  { country: 'China',       days: 115, dep: '57% via Hormuz',             color: '#1D9E75', pct: 45,  highlight: false },
-  { country: 'Thailand',    days: 95,  dep: '59% from Gulf',              color: '#E8956D', pct: 37,  highlight: false },
-  { country: 'India',       days: 74,  dep: '~45% from Middle East',      color: '#E8956D', pct: 29,  highlight: false },
-  { country: 'Philippines', days: 55,  dep: '95% from Gulf',              color: '#C4622D', pct: 22,  highlight: false },
-  { country: 'Myanmar',     days: 40,  dep: '~97% imported, 3% domestic', color: '#C4622D', pct: 16,  highlight: true  },
-  { country: 'Vietnam',     days: 38,  dep: '88% from Gulf',              color: '#C4622D', pct: 15,  highlight: false },
-  { country: 'Indonesia',   days: 23,  dep: '20% from Gulf',              color: '#A32D2D', pct: 9,   highlight: false },
-  { country: 'Bangladesh',  days: 14,  dep: 'High Gulf reliance',         color: '#A32D2D', pct: 5,   highlight: false },
+  { en: 'Japan',        mm: 'ဂျပန်',           days: 254, dep_en: '95% from Middle East',       dep_mm: 'အရှေ့အလယ်ပိုင်းမှ ၉၅%',        color: '#1D9E75', pct: 100 },
+  { en: 'South Korea',  mm: 'တောင်ကိုရီးယား',   days: 210, dep_en: '70% from Middle East',       dep_mm: 'အရှေ့အလယ်ပိုင်းမှ ၇၀%',        color: '#1D9E75', pct: 83  },
+  { en: 'China',        mm: 'တရုတ်',            days: 115, dep_en: '57% via Hormuz',             dep_mm: 'ဟော်မုဇ်မှ ၅၇%',               color: '#1D9E75', pct: 45  },
+  { en: 'Thailand',     mm: 'ထိုင်း',           days: 95,  dep_en: '59% from Gulf',              dep_mm: 'ပင်လယ်ကွေ့မှ ၅၉%',             color: '#E8956D', pct: 37  },
+  { en: 'India',        mm: 'အိန္ဒိယ',          days: 74,  dep_en: '~45% from Middle East',      dep_mm: 'အရှေ့အလယ်ပိုင်းမှ ~၄၅%',       color: '#E8956D', pct: 29  },
+  { en: 'Philippines',  mm: 'ဖိလစ်ပိုင်',      days: 55,  dep_en: '95% from Gulf',              dep_mm: 'ပင်လယ်ကွေ့မှ ၉၅%',             color: '#C4622D', pct: 22  },
+  { en: 'Myanmar',      mm: 'မြန်မာ',           days: 40,  dep_en: '~97% imported, 3% domestic', dep_mm: '~၉၇% တင်သွင်း၊ ၃% ပြည်တွင်း', color: '#C4622D', pct: 16, highlight: true },
+  { en: 'Vietnam',      mm: 'ဗီယက်နမ်',         days: 38,  dep_en: '88% from Gulf',              dep_mm: 'ပင်လယ်ကွေ့မှ ၈၈%',             color: '#C4622D', pct: 15  },
+  { en: 'Indonesia',    mm: 'အင်ဒိုနီးရှား',    days: 23,  dep_en: '20% from Gulf',              dep_mm: 'ပင်လယ်ကွေ့မှ ၂၀%',             color: '#A32D2D', pct: 9   },
+  { en: 'Bangladesh',   mm: 'ဘင်္ဂလားဒေ့ရှ်',  days: 14,  dep_en: 'High Gulf reliance',         dep_mm: 'ပင်လယ်ကွေ့ မှီခိုမှု မြင့်မား', color: '#A32D2D', pct: 5   },
 ];
 
-const grid = document.getElementById('vulnGrid');
-vulnData.forEach(d => {
+const gridEl = document.getElementById('vulnGrid');
+vulnData.forEach(function(d) {
   const card = document.createElement('div');
   card.className = 'vuln-card' + (d.highlight ? ' highlight' : '');
   card.innerHTML = `
-    ${d.highlight ? '<span class="you-tag">Your country</span>' : ''}
-    <div class="vuln-country">${d.country}</div>
+    <div class="vuln-country"><span class="en">${d.en}</span><span class="mm">${d.mm}</span></div>
     <div class="vuln-days" style="color:${d.color};">${d.days}</div>
-    <div class="vuln-days-lbl">days of reserves</div>
+    <div class="vuln-days-lbl"><span class="en">days of reserves</span><span class="mm">သိုလှောင်ထားသော ရက်</span></div>
     <div class="vuln-bar-bg"><div class="vuln-bar-fill" style="width:${d.pct}%;background:${d.color};"></div></div>
-    <div class="vuln-dep">${d.dep}</div>
-  `;
-  grid.appendChild(card);
+    <div class="vuln-dep"><span class="en">${d.dep_en}</span><span class="mm">${d.dep_mm}</span></div>`;
+  gridEl.appendChild(card);
 });
 </script>
 </body>
